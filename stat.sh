@@ -14,7 +14,7 @@ IOWAIT_LIMIT=25
 while [ 1 ]
 do
   CPU_USAGE0=($(grep "cpu " /proc/stat))
-  sleep 1
+  sleep 5
   CPU_USAGE1=($(grep "cpu " /proc/stat))
 
   LOAD_AVG=($(cat /proc/loadavg))
