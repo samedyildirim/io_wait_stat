@@ -16,6 +16,8 @@ do
   CPU_USAGE0=($(grep "cpu " /proc/stat))
   sleep 1
   CPU_USAGE1=($(grep "cpu " /proc/stat))
+
+  LOAD_AVG=($(cat /proc/loadavg))
   
   TOPLAM0=$(echo ${CPU_USAGE0[*]}|grep -Po "\d*"|paste -sd +|bc)
   TOPLAM1=$(echo ${CPU_USAGE1[*]}|grep -Po "\d*"|paste -sd +|bc)
@@ -30,8 +32,8 @@ do
   USER_P=$(echo "$SCALE 100*$USER_STAT/$TOPLAM_FARK"|bc)
   IOWAIT_LIMIT_STAT=$(($TOPLAM_FARK*$IOWAIT_LIMIT/100))
 
-  if [[ "$IOWAIT_STAT" -gt "$IOWAIT_LIMIT_STAT" ]]
+  if [[ "$IOWAIT_STAT" -gt "$IOWAIT_LIMIT_STAT" ]] || [[ "${AVG[0]}" -gt "4" ]]
   then
-    echo $(date +"%Y-%m-%d %H:%M:%S") "$CPU_USAGE1 user:%$USER_P idle:%$IDLE_P iowait:%$IOWAIT_P"
+    echo $(date +"%Y-%m-%d %H:%M:%S") "| $CPU_USAGE1 user:%$USER_P idle:%$IDLE_P iowait:%$IOWAIT_P | ${LOAD_AVG[*]}"
 	fi
 done
