@@ -11,13 +11,19 @@ SCALE="scale=2;"
 #% olarak iowait limiti
 IOWAIT_LIMIT=25
 
+#% olarak load_avg/cpu limiti
+LOAD_PER_LIMIT=50
+
 while [ 1 ]
 do
   CPU_USAGE0=($(grep "cpu " /proc/stat))
   sleep 5
   CPU_USAGE1=($(grep "cpu " /proc/stat))
+  
+  CPU_COUNT=$(grep "cpu[0-9]" /proc/stat|wc -l)
 
   LOAD_AVG=($(cat /proc/loadavg))
+  LOAD_LIMIT=$(echo "$CPU_COUNT*$LOAD_PER_LIMIT/100"|bc)
   
   TOPLAM0=$(echo ${CPU_USAGE0[*]}|grep -Po "\d*"|paste -sd +|bc)
   TOPLAM1=$(echo ${CPU_USAGE1[*]}|grep -Po "\d*"|paste -sd +|bc)
@@ -32,7 +38,7 @@ do
   USER_P=$(echo "$SCALE 100*$USER_STAT/$TOPLAM_FARK"|bc)
   IOWAIT_LIMIT_STAT=$(($TOPLAM_FARK*$IOWAIT_LIMIT/100))
 
-  if [[ "$IOWAIT_STAT" -gt "$IOWAIT_LIMIT_STAT" ]] || [[ "${AVG[0]}" -gt "4" ]]
+  if [[ "$IOWAIT_STAT" -gt "$IOWAIT_LIMIT_STAT" ]] || [[ $(echo "${LOAD_AVG[0]}>$LOAD_LIMIT"|bc) -eq "1" ]] 
   then
     echo $(date +"%Y-%m-%d %H:%M:%S") "| $CPU_USAGE1 user:%$USER_P idle:%$IDLE_P iowait:%$IOWAIT_P | ${LOAD_AVG[*]}"
 	fi
